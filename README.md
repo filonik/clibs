@@ -48,7 +48,7 @@ brew install libtess2
 
 Install bindings with the provided setup script:
 ```
-python setup.py install clibs.mcpp
+python setup.py install clibs.tess2
 ```
 
 ### Usage
@@ -58,8 +58,8 @@ import sys
 
 from clibs.tess2 import *
 
-t = Tesselator()
+t = Tesselator(TESS_WINDING_ODD, TESS_POLYGONS)
 t.add_contour([[1.0, 1.0, 0.0], [-1.0, 1.0, 0.0], [-1.0, -1.0, 0.0], [1.0, -1.0, 0.0]])
 t.tesselate()
-print([polygon for polygon in t]
+print([polygon for polygon in t])
 ```
