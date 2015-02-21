@@ -58,8 +58,8 @@ import sys
 
 from clibs.tess2 import *
 
-t = Tesselator(TESS_WINDING_ODD, TESS_POLYGONS)
+t = Tesselator()
 t.add_contour([[1.0, 1.0, 0.0], [-1.0, 1.0, 0.0], [-1.0, -1.0, 0.0], [1.0, -1.0, 0.0]])
-t.tesselate()
+t.tesselate(TESS_WINDING_ODD, TESS_POLYGONS)
 print([polygon for polygon in t])
 ```
