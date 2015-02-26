@@ -440,27 +440,27 @@ cpdef get_proc_address(const char* procname):
 cdef class VideoMode:
     property width:
         def __get__(self):
-            return self._this_ptr.width
+            return self._this.width
 
     property height:
         def __get__(self):
-            return self._this_ptr.height
+            return self._this.height
     
     property red_bits:
         def __get__(self):
-            return self._this_ptr.redBits
+            return self._this.redBits
 
     property green_bits:
         def __get__(self):
-            return self._this_ptr.greenBits
+            return self._this.greenBits
 
     property blue_bits:
         def __get__(self):
-            return self._this_ptr.blueBits
+            return self._this.blueBits
 
     property refresh_rate:
         def __get__(self):
-            return self._this_ptr.refreshRate
+            return self._this.refreshRate
 
     property size:
         def __get__(self):
