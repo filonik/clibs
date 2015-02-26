@@ -246,10 +246,10 @@ DEFAULT_WINDOW_HINTS = {
 }
 
 DEFAULT_CONTEXT_HINTS = {
-    #c_glfw3.GLFW_CONTEXT_VERSION_MAJOR: 4,
-    #c_glfw3.GLFW_CONTEXT_VERSION_MINOR: 0,
-    #c_glfw3.GLFW_OPENGL_FORWARD_COMPAT: 1,
-    #c_glfw3.GLFW_OPENGL_PROFILE: c_glfw3.GLFW_OPENGL_CORE_PROFILE,
+    c_glfw3.GLFW_CONTEXT_VERSION_MAJOR: 3,
+    c_glfw3.GLFW_CONTEXT_VERSION_MINOR: 2,
+    c_glfw3.GLFW_OPENGL_FORWARD_COMPAT: 1,
+    c_glfw3.GLFW_OPENGL_PROFILE: c_glfw3.GLFW_OPENGL_CORE_PROFILE,
 }
 
 #
@@ -378,8 +378,20 @@ cdef void dropfun_cb(c_glfw3.GLFWwindow* a,int b,const char** c):
 
 import contextlib as cl
 
+@cl.contextmanager  
+def chdir(dirname=None):
+    import os
+    curdir = os.getcwd()
+    try:  
+        if dirname is not None:  
+            os.chdir(dirname)
+        yield  
+    finally:  
+        os.chdir(curdir)
+
 cpdef initialize():
-    return c_glfw3.glfwInit()
+    with chdir():
+        return c_glfw3.glfwInit()
 
 cpdef terminate():
     c_glfw3.glfwTerminate()
@@ -693,7 +705,7 @@ cdef class Window:
         _hints.update(DEFAULT_CONTEXT_HINTS)
         _hints.update(hints or {})
         
-        c_glfw3.glfwDefaultWindowHints()
+        #c_glfw3.glfwDefaultWindowHints()
         for key, value in _hints.items():
             c_glfw3.glfwWindowHint(key, value)
         
