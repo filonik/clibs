@@ -87,6 +87,6 @@ from clibs import tess2
 
 t = tess2.Tesselator()
 t.add_contour([[1.0, 1.0, 0.0], [-1.0, 1.0, 0.0], [-1.0, -1.0, 0.0], [1.0, -1.0, 0.0]])
-t.tesselate(TESS_WINDING_ODD, TESS_POLYGONS)
+t.tesselate(tess2.WindingRule.ODD, tess2.ElementType.POLYGONS)
 print(list(t))
 ```
