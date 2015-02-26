@@ -6,11 +6,6 @@
 cimport c_mcpp_lib
 
 	#
-	# Defines:
-	#
-
-
-	#
 	# Supplements:
 	#
 

@@ -6,12 +6,6 @@
 cimport c_tesselator
 
 	#
-	# Defines:
-	#
-
-TESS_UNDEF = c_tesselator.TESS_UNDEF
-
-	#
 	# Supplements:
 	#
 

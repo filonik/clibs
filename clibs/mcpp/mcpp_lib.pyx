@@ -6,6 +6,11 @@
 cimport c_mcpp_lib
 
 	#
+	# Defines:
+	#
+
+
+	#
 	# Supplements:
 	#
 
@@ -52,7 +57,7 @@ def lib_main(argv):
     return cret
 
 cdef class Preprocessor:
-    def preprocess(*args):
+    def preprocess(self, *args):
         use_mem_buffers(1)
     
         if lib_main(('',) + args) != 0:
