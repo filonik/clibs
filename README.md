@@ -29,10 +29,9 @@ with glfw3.initialized():
     
     window.on_keyboard_key(handle_keyboard_key)
     
-    context = glfw3.Context(window)
-    glfw3.Context.set_current(context)
-
-    while not window.should_close():
+    glfw3.Context.set_current(window.context)
+    
+    while not window.should_close:
         glfw3.poll_events()
         
         # OpenGL Code

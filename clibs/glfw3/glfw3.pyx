@@ -636,6 +636,10 @@ cdef class GammaRamp:
         return <size_t>self._this
 
 cdef class Window:
+    property context:
+        def __get__(self):
+            return Context(self)
+    
     property position:
         def __get__(self):
             cdef int x, y
@@ -677,11 +681,13 @@ cdef class Window:
         
         def __set__(self, const char * value):
             c_glfw3.glfwSetClipboardString(self._this, value)
-            
+    
     def __cinit__(self, *args, **kwargs):
         self._this = NULL
     
-    def __init__(self, title, size=DEFAULT_WINDOW_SIZE, position=DEFAULT_WINDOW_POSITION, monitor=None, share=None, hints=None):
+    def __init__(self, title, size=DEFAULT_WINDOW_SIZE, position=DEFAULT_WINDOW_POSITION, Monitor monitor=None, Context share=None, hints=None):
+        cdef c_glfw3.GLFWmonitor * _monitor = NULL if monitor is None else monitor._this
+        cdef c_glfw3.GLFWwindow * _share = NULL if share is None else share._this
         _hints = {}
         _hints.update(DEFAULT_WINDOW_HINTS)
         _hints.update(DEFAULT_CONTEXT_HINTS)
@@ -691,7 +697,7 @@ cdef class Window:
         for key, value in _hints.items():
             c_glfw3.glfwWindowHint(key, value)
         
-        self._this = c_glfw3.glfwCreateWindow(size[0], size[1], title, NULL, NULL)
+        self._this = c_glfw3.glfwCreateWindow(size[0], size[1], title, _monitor, _share)
         
         if not self:
             raise RuntimeError("Failed to create window.")
