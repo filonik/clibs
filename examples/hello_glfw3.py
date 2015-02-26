@@ -5,7 +5,10 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 
-from clibs import glfw3, opengl
+import OpenGL
+from OpenGL.GL import *
+
+from clibs import glfw3
 
 def handle_keyboard_key(window, key, scancode, action, mods):
     if key == glfw3.GLFW_KEY_ESCAPE and action == glfw3.GLFW_RELEASE:
@@ -22,7 +25,8 @@ def main():
         while not window.should_close:
             glfw3.poll_events()
             
-            opengl.clear([1,0,0])
+            glClearColor(0, 0, 0, 1)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             
             window.swap_buffers()
 
