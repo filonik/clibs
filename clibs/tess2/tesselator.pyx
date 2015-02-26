@@ -101,7 +101,7 @@ cdef class Tesselator:
     cpdef add_contour(self, contour):
         cdef:
             size_t i, j
-            float[:,::1] data
+            float[:,:] data
             int size
             int stride
             int count
