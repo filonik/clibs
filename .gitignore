@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 
 # C extensions
+*.h
+*.c
 *.so
 
 # Distribution / packaging
@@ -52,3 +54,5 @@ docs/_build/
 
 # PyBuilder
 target/
+
+.DS_Store

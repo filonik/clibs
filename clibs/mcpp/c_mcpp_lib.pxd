@@ -15,6 +15,7 @@ cdef extern from "mcpp_lib.h":
 	#
 
 	
+	
 
 	#
 	# Enums:
@@ -38,11 +39,5 @@ cdef extern from "mcpp_lib.h":
 
 	void mcpp_reset_def_out_func()
 	void mcpp_use_mem_buffers(int tf)
-	char* mcpp_get_mem_buffer(OUTDEST od)
-	int mcpp_lib_main(int argc,char** argv)
-
-	#
-	# Supplements:
-	#
-
-
+	char * mcpp_get_mem_buffer(OUTDEST od)
+	int mcpp_lib_main(int argc,char * * argv)

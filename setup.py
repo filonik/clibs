@@ -21,9 +21,21 @@ if 'darwin' in platform or 'linux' in platform:
     extra_link_args.extend(['-L/usr/local/lib', '-L/opt/local/lib'])
 
 _all_ = {
+    'clibs.glfw3': Extension('clibs.glfw3.glfw3', ['clibs/glfw3/glfw3.pyx'], libraries=['glfw3'],
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args
+    ),
     'clibs.mcpp': Extension('clibs.mcpp.mcpp_lib', ['clibs/mcpp/mcpp_lib.pyx'], libraries=['mcpp'],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args
+    ),
+    'clibs.openal': Extension('clibs.openal.al', ['clibs/openal/al.pyx'], libraries=[],
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args + ['-framework', 'OpenAL']
+    ),
+    'clibs.opengl': Extension('clibs.opengl.gl3', ['clibs/opengl/gl3.pyx'], libraries=[],
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args + ['-framework', 'OpenGL']
     ),
     'clibs.tess2': Extension('clibs.tess2.tesselator', ['clibs/tess2/tesselator.pyx'], libraries=['tess2'],
         extra_compile_args=extra_compile_args,
@@ -47,5 +59,6 @@ setup(
     packages=['clibs'] + selection,
     package_data={package: ['*.pyx', '*.pxd'] for package in selection},
     requires=['cython'],
-    ext_modules=ext_modules
+    ext_modules=ext_modules,
+    zip_safe=True
 )
