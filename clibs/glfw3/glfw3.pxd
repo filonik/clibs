@@ -36,8 +36,6 @@ cdef class Monitor:
     cdef inline void swap(Monitor self, Monitor other):
         self._this, other._this = other._this, self._this
 
-#GLFW 3.1+
-"""
 cdef class Cursor:
     cdef const c_glfw3.GLFWcursor * _this
 
@@ -64,7 +62,6 @@ cdef class Image:
     @staticmethod
     cdef inline void swap(Image self, Image other):
         self._this, other._this = other._this, self._this
-"""
 
 cdef class GammaRamp:
     cdef const c_glfw3.GLFWgammaramp * _this
@@ -112,14 +109,12 @@ cdef class Window:
     cpdef set_framebuffer_size_callback(self, cbfun)
     cpdef set_key_callback(self, cbfun)
     cpdef set_char_callback(self, cbfun)
-    #GLFW 3.1+
-    #cpdef set_char_mods_callback(self, cbfun)
+    cpdef set_char_mods_callback(self, cbfun)
     cpdef set_mouse_button_callback(self, cbfun)
     cpdef set_cursor_position_callback(self, cbfun)
     cpdef set_cursor_enter_callback(self, cbfun)
     cpdef set_scroll_callback(self, cbfun)
-    #GLFW 3.1+
-    #cpdef set_drop_callback(self, cbfun)
+    cpdef set_drop_callback(self, cbfun)
     
     cpdef get_attribute(self, int attrib)
     cpdef get_input_mode(self, int mode)

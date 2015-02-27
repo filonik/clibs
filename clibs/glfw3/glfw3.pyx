@@ -184,6 +184,8 @@ GLFW_ICONIFIED = c_glfw3.GLFW_ICONIFIED
 GLFW_RESIZABLE = c_glfw3.GLFW_RESIZABLE
 GLFW_VISIBLE = c_glfw3.GLFW_VISIBLE
 GLFW_DECORATED = c_glfw3.GLFW_DECORATED
+GLFW_AUTO_ICONIFY = c_glfw3.GLFW_AUTO_ICONIFY
+GLFW_FLOATING = c_glfw3.GLFW_FLOATING
 GLFW_RED_BITS = c_glfw3.GLFW_RED_BITS
 GLFW_GREEN_BITS = c_glfw3.GLFW_GREEN_BITS
 GLFW_BLUE_BITS = c_glfw3.GLFW_BLUE_BITS
@@ -199,6 +201,7 @@ GLFW_STEREO = c_glfw3.GLFW_STEREO
 GLFW_SAMPLES = c_glfw3.GLFW_SAMPLES
 GLFW_SRGB_CAPABLE = c_glfw3.GLFW_SRGB_CAPABLE
 GLFW_REFRESH_RATE = c_glfw3.GLFW_REFRESH_RATE
+GLFW_DOUBLEBUFFER = c_glfw3.GLFW_DOUBLEBUFFER
 GLFW_CLIENT_API = c_glfw3.GLFW_CLIENT_API
 GLFW_CONTEXT_VERSION_MAJOR = c_glfw3.GLFW_CONTEXT_VERSION_MAJOR
 GLFW_CONTEXT_VERSION_MINOR = c_glfw3.GLFW_CONTEXT_VERSION_MINOR
@@ -207,6 +210,7 @@ GLFW_CONTEXT_ROBUSTNESS = c_glfw3.GLFW_CONTEXT_ROBUSTNESS
 GLFW_OPENGL_FORWARD_COMPAT = c_glfw3.GLFW_OPENGL_FORWARD_COMPAT
 GLFW_OPENGL_DEBUG_CONTEXT = c_glfw3.GLFW_OPENGL_DEBUG_CONTEXT
 GLFW_OPENGL_PROFILE = c_glfw3.GLFW_OPENGL_PROFILE
+GLFW_CONTEXT_RELEASE_BEHAVIOR = c_glfw3.GLFW_CONTEXT_RELEASE_BEHAVIOR
 GLFW_OPENGL_API = c_glfw3.GLFW_OPENGL_API
 GLFW_OPENGL_ES_API = c_glfw3.GLFW_OPENGL_ES_API
 GLFW_NO_ROBUSTNESS = c_glfw3.GLFW_NO_ROBUSTNESS
@@ -221,8 +225,18 @@ GLFW_STICKY_MOUSE_BUTTONS = c_glfw3.GLFW_STICKY_MOUSE_BUTTONS
 GLFW_CURSOR_NORMAL = c_glfw3.GLFW_CURSOR_NORMAL
 GLFW_CURSOR_HIDDEN = c_glfw3.GLFW_CURSOR_HIDDEN
 GLFW_CURSOR_DISABLED = c_glfw3.GLFW_CURSOR_DISABLED
+GLFW_ANY_RELEASE_BEHAVIOR = c_glfw3.GLFW_ANY_RELEASE_BEHAVIOR
+GLFW_RELEASE_BEHAVIOR_FLUSH = c_glfw3.GLFW_RELEASE_BEHAVIOR_FLUSH
+GLFW_RELEASE_BEHAVIOR_NONE = c_glfw3.GLFW_RELEASE_BEHAVIOR_NONE
+GLFW_ARROW_CURSOR = c_glfw3.GLFW_ARROW_CURSOR
+GLFW_IBEAM_CURSOR = c_glfw3.GLFW_IBEAM_CURSOR
+GLFW_CROSSHAIR_CURSOR = c_glfw3.GLFW_CROSSHAIR_CURSOR
+GLFW_HAND_CURSOR = c_glfw3.GLFW_HAND_CURSOR
+GLFW_HRESIZE_CURSOR = c_glfw3.GLFW_HRESIZE_CURSOR
+GLFW_VRESIZE_CURSOR = c_glfw3.GLFW_VRESIZE_CURSOR
 GLFW_CONNECTED = c_glfw3.GLFW_CONNECTED
 GLFW_DISCONNECTED = c_glfw3.GLFW_DISCONNECTED
+GLFW_DONT_CARE = c_glfw3.GLFW_DONT_CARE
 
 	#
 	# Supplements:
@@ -244,8 +258,7 @@ DEFAULT_WINDOW_HINTS = {
     c_glfw3.GLFW_FOCUSED: 1,
     c_glfw3.GLFW_RESIZABLE: 1,
     c_glfw3.GLFW_VISIBLE: 1,
-    #GLFW 3.1+
-    #c_glfw3.GLFW_FLOATING: 0,
+    c_glfw3.GLFW_FLOATING: 0,
 }
 
 DEFAULT_CONTEXT_HINTS = {
@@ -268,8 +281,7 @@ class WindowAttribute(IntEnum):
     VISIBLE=c_glfw3.GLFW_VISIBLE
     RESIZABLE=c_glfw3.GLFW_RESIZABLE
     DECORATED=c_glfw3.GLFW_DECORATED
-    #GLFW 3.1+
-    #FLOATING=c_glfw3.GLFW_FLOATING
+    FLOATING=c_glfw3.GLFW_FLOATING
 
 #cpdef enum ContextAttribute:
 class ContextAttribute(IntEnum):
@@ -282,8 +294,6 @@ class ContextAttribute(IntEnum):
     OPENGL_PROFILE=c_glfw3.GLFW_OPENGL_PROFILE
     ROBUSTNESS=c_glfw3.GLFW_CONTEXT_ROBUSTNESS
 
-#GLFW 3.1+
-"""
 #cpdef enum CursorShape:
 class CursorShape(IntEnum):
     ARROW=c_glfw3.GLFW_ARROW_CURSOR
@@ -292,7 +302,6 @@ class CursorShape(IntEnum):
     HAND=c_glfw3.GLFW_HAND_CURSOR
     HRESIZE=c_glfw3.GLFW_HRESIZE_CURSOR
     VRESIZE=c_glfw3.GLFW_VRESIZE_CURSOR
-"""
 
 #cpdef enum InputMode:
 class InputMode(IntEnum):
@@ -501,11 +510,8 @@ cpdef poll_events():
 cpdef wait_events():
     c_glfw3.glfwWaitEvents()
 
-#GLFW 3.1+
-"""
 cpdef post_empty_event():
     c_glfw3.glfwPostEmptyEvent()
-"""
 
 cpdef set_error_callback(cbfun):
     global _error_fun
@@ -683,8 +689,6 @@ cdef class Monitor:
     def __hash__(self):
         return <size_t>self._this
 
-#GLFW 3.1+
-"""
 cdef class Cursor:
     def __cinit__(self):
         self._this = NULL
@@ -813,7 +817,6 @@ cdef class Image:
     
     def __hash__(self):
         return <size_t>self._this
-"""
 
 cdef class GammaRamp:
     property red:
@@ -882,14 +885,13 @@ cdef class Window:
         
         def __set__(self, value):
             c_glfw3.glfwSetWindowSize(self._this, value[0], value[1])
-    #GLFW 3.1+
-    """
+    
     property frame_size:
         def __get__(self):
             cdef int l, t, r, b
             c_glfw3.glfwGetWindowFrameSize(self._this, &l, &t, &r, &b)
             return (l, t, r, b)
-    """
+    
     property should_close:
         def __get__(self):
             return c_glfw3.glfwWindowShouldClose(self._this)
@@ -1011,13 +1013,10 @@ cdef class Window:
         _charfuns[<size_t>self._this] = cbfun
         c_glfw3.glfwSetCharCallback(self._this, charfun_cb)
     
-    #GLFW 3.1
-    """
     cpdef set_char_mods_callback(self, cbfun):
         global _charmodsfuns
         _charmodsfuns[<size_t>self._this] = cbfun
         c_glfw3.glfwSetCharModsCallback(self._this, charmodsfun_cb)
-    """
     
     cpdef set_mouse_button_callback(self, cbfun):
         global _mousebuttonfuns
@@ -1039,13 +1038,10 @@ cdef class Window:
         _scrollfuns[<size_t>self._this] = cbfun
         c_glfw3.glfwSetScrollCallback(self._this, scrollfun_cb)
     
-    #GLFW 3.1
-    """
     cpdef set_drop_callback(self, cbfun):
         global _dropfuns
         _dropfuns[<size_t>self._this] = cbfun
         c_glfw3.glfwSetDropCallback(self._this, dropfun_cb)
-    """
     
     on_window_position = set_window_position_callback
     on_window_size = set_window_size_callback
@@ -1056,12 +1052,12 @@ cdef class Window:
     on_framebuffer_size = set_framebuffer_size_callback
     on_keyboard_key = set_key_callback
     on_keyboard_char = set_char_callback
-    #on_keyboard_char_mods = set_char_mods_callback
+    on_keyboard_char_mods = set_char_mods_callback
     on_mouse_button = set_mouse_button_callback
     on_mouse_position = set_cursor_position_callback
     on_mouse_enter = set_cursor_enter_callback
     on_mouse_wheel = set_scroll_callback
-    #on_window_drop = set_drop_callback
+    on_window_drop = set_drop_callback
     
     cpdef get_attribute(self, int attrib):
         return c_glfw3.glfwGetWindowAttrib(self._this, attrib)
@@ -1086,7 +1082,7 @@ cdef class Window:
     
     cpdef swap_buffers(self):
         c_glfw3.glfwSwapBuffers(self._this)
-    
+
 cdef class Context:
     @staticmethod
     def get_current():
