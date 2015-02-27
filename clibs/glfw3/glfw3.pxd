@@ -10,24 +10,6 @@ cimport c_glfw3
 	#
 
 
-#TODO: Enums...
-"""
-#from enum import IntEnum
-
-#class Action(IntEnum):
-cpdef enum Action:
-    PRESS=c_glfw3.GLFW_PRESS
-    RELEASE=c_glfw3.GLFW_RELEASE
-    REPEAT=c_glfw3.GLFW_REPEAT
-
-#class Modifier(IntEnum):
-cpdef enum Modifier:
-    MOD_SHIFT=c_glfw3.GLFW_MOD_SHIFT
-    MOD_CONTROL=c_glfw3.GLFW_MOD_CONTROL
-    MOD_ALT=c_glfw3.GLFW_MOD_ALT
-    MOD_SUPER=c_glfw3.GLFW_MOD_SUPER
-"""
-
 cdef class VideoMode:
     cdef const c_glfw3.GLFWvidmode * _this
     
@@ -53,7 +35,37 @@ cdef class Monitor:
     @staticmethod
     cdef inline void swap(Monitor self, Monitor other):
         self._this, other._this = other._this, self._this
+
+#GLFW 3.1+
+"""
+cdef class Cursor:
+    cdef const c_glfw3.GLFWcursor * _this
+
+    @staticmethod
+    cdef inline Cursor fromthis(c_glfw3.GLFWcursor * _this):
+        cdef Cursor result = Cursor.__new__(Cursor)
+        result._this = _this
+        return result
     
+    @staticmethod
+    cdef inline void swap(Cursor self, Cursor other):
+        self._this, other._this = other._this, self._this
+
+cdef class Image:
+    cdef const c_glfw3.GLFWimage * _this
+    cdef float[:,:,::1] _data
+    
+    @staticmethod
+    cdef inline Image fromthis(c_glfw3.GLFWimage * _this):
+        cdef Image result = Image.__new__(Image)
+        result._this = _this
+        return result
+    
+    @staticmethod
+    cdef inline void swap(Image self, Image other):
+        self._this, other._this = other._this, self._this
+"""
+
 cdef class GammaRamp:
     cdef const c_glfw3.GLFWgammaramp * _this
     
@@ -82,7 +94,15 @@ cdef class Window:
     
     cdef inline void release(self):
         self._this = NULL
-        
+    
+    @staticmethod
+    cdef inline void default_hints():
+        c_glfw3.glfwDefaultWindowHints()
+    
+    @staticmethod
+    cdef inline void hint(int target, int hint):
+        c_glfw3.glfwWindowHint(target, hint)
+    
     cpdef set_window_position_callback(self, cbfun)
     cpdef set_window_size_callback(self, cbfun)
     cpdef set_window_close_callback(self, cbfun)
@@ -100,6 +120,10 @@ cdef class Window:
     cpdef set_scroll_callback(self, cbfun)
     #GLFW 3.1+
     #cpdef set_drop_callback(self, cbfun)
+    
+    cpdef get_attribute(self, int attrib)
+    cpdef get_input_mode(self, int mode)
+    cpdef set_input_mode(self, int mode, int value)
     
     cpdef iconify(self)
     cpdef restore(self)

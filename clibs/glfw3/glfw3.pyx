@@ -229,6 +229,9 @@ GLFW_DISCONNECTED = c_glfw3.GLFW_DISCONNECTED
 	#
 
 
+from libc.stdlib cimport malloc, free
+
+from cython cimport view
 
 #
 # Defines
@@ -251,6 +254,64 @@ DEFAULT_CONTEXT_HINTS = {
     c_glfw3.GLFW_OPENGL_FORWARD_COMPAT: 1,
     c_glfw3.GLFW_OPENGL_PROFILE: c_glfw3.GLFW_OPENGL_CORE_PROFILE,
 }
+
+#
+# Enums
+#
+
+from enum import IntEnum
+
+#cpdef enum WindowAttribute:
+class WindowAttribute(IntEnum):
+    FOCUSED=c_glfw3.GLFW_FOCUSED
+    ICONIFIED=c_glfw3.GLFW_ICONIFIED
+    VISIBLE=c_glfw3.GLFW_VISIBLE
+    RESIZABLE=c_glfw3.GLFW_RESIZABLE
+    DECORATED=c_glfw3.GLFW_DECORATED
+    #GLFW 3.1+
+    #FLOATING=c_glfw3.GLFW_FLOATING
+
+#cpdef enum ContextAttribute:
+class ContextAttribute(IntEnum):
+    CLIENT_API=c_glfw3.GLFW_CLIENT_API
+    VERSION_MAJOR=c_glfw3.GLFW_CONTEXT_VERSION_MAJOR
+    VERSION_MINOR=c_glfw3.GLFW_CONTEXT_VERSION_MINOR
+    VERSION_MICRO=c_glfw3.GLFW_CONTEXT_REVISION
+    OPENGL_FORWARD_COMPAT=c_glfw3.GLFW_OPENGL_FORWARD_COMPAT
+    OPENGL_DEBUG_CONTEXT=c_glfw3.GLFW_OPENGL_DEBUG_CONTEXT
+    OPENGL_PROFILE=c_glfw3.GLFW_OPENGL_PROFILE
+    ROBUSTNESS=c_glfw3.GLFW_CONTEXT_ROBUSTNESS
+
+#GLFW 3.1+
+"""
+#cpdef enum CursorShape:
+class CursorShape(IntEnum):
+    ARROW=c_glfw3.GLFW_ARROW_CURSOR
+    IBEAM=c_glfw3.GLFW_IBEAM_CURSOR
+    CROSSHAIR=c_glfw3.GLFW_CROSSHAIR_CURSOR
+    HAND=c_glfw3.GLFW_HAND_CURSOR
+    HRESIZE=c_glfw3.GLFW_HRESIZE_CURSOR
+    VRESIZE=c_glfw3.GLFW_VRESIZE_CURSOR
+"""
+
+#cpdef enum InputMode:
+class InputMode(IntEnum):
+    CURSOR=c_glfw3.GLFW_CURSOR
+    STICKY_KEYS=c_glfw3.GLFW_STICKY_KEYS
+    STICKY_MOUSE_BUTTONS=c_glfw3.GLFW_STICKY_MOUSE_BUTTONS
+
+#cpdef enum Action:
+class Action(IntEnum):
+    PRESS=c_glfw3.GLFW_PRESS
+    RELEASE=c_glfw3.GLFW_RELEASE
+    REPEAT=c_glfw3.GLFW_REPEAT
+
+#cpdef enum Modifier:
+class Modifier(IntEnum):
+    SHIFT=c_glfw3.GLFW_MOD_SHIFT
+    CONTROL=c_glfw3.GLFW_MOD_CONTROL
+    ALT=c_glfw3.GLFW_MOD_ALT
+    SUPER=c_glfw3.GLFW_MOD_SUPER
 
 #
 # Callbacks
@@ -416,8 +477,24 @@ cpdef double get_time():
     return c_glfw3.glfwGetTime()
 
 cpdef set_time(double value):
-    return c_glfw3.glfwSetTime(value)
+    c_glfw3.glfwSetTime(value)
     
+cpdef joystick_present(int joy):
+    return c_glfw3.glfwJoystickPresent(joy)
+
+cpdef get_joystick_axes(int joy):
+    cdef int count
+    cdef const float* axes = c_glfw3.glfwGetJoystickAxes(joy, &count)
+    return [axes[i] for i in range(count)]
+
+cpdef get_joystick_buttons(int joy):
+    cdef int count
+    cdef const unsigned char* buttons = c_glfw3.glfwGetJoystickButtons(joy, &count)
+    return [buttons[i] for i in range(count)]
+
+cpdef get_joystick_name(int joy):
+    return c_glfw3.glfwGetJoystickName(joy)
+
 cpdef poll_events():
     c_glfw3.glfwPollEvents()
 
@@ -458,6 +535,10 @@ cdef class VideoMode:
         def __get__(self):
             return self._this.height
     
+    property size:
+        def __get__(self):
+            return (self.width, self.height)
+    
     property red_bits:
         def __get__(self):
             return self._this.redBits
@@ -473,10 +554,6 @@ cdef class VideoMode:
     property refresh_rate:
         def __get__(self):
             return self._this.refreshRate
-
-    property size:
-        def __get__(self):
-            return (self.width, self.height)
     
     property color_bits:
         def __get__(self):
@@ -534,6 +611,10 @@ cdef class Monitor:
     property name:
         def __get__(self):
             return c_glfw3.glfwGetMonitorName(self._this)
+    
+    property gamma:
+        def __set__(self, value):
+            c_glfw3.glfwSetGamma(self._this, value)
     
     property gamma_ramp:
         def __get__(self):
@@ -602,6 +683,138 @@ cdef class Monitor:
     def __hash__(self):
         return <size_t>self._this
 
+#GLFW 3.1+
+"""
+cdef class Cursor:
+    def __cinit__(self):
+        self._this = NULL
+    
+    @staticmethod
+    def fromshape(shape):
+        c_glfw3.glfwCreateStandardCursor(shape)
+        return Cursor.fromthis()
+    
+    def __init__(self, Image image, int xhot, int yhot):
+        self._this = c_glfw3.glfwCreateCursor(image._this, xhot, yhot)
+    
+    def __dealloc__(self):
+        c_glfw3.glfwDestroyCursor(self._this)
+        self._this = NULL
+        
+    def __richcmp__(Cursor self, Cursor other, int op):
+        if op == 0:
+            # <
+            return self._this < other._this
+        elif op == 1:
+            # <=
+            return self._this <= other._this
+        elif op == 2:
+            # ==
+            return self._this == other._this
+        elif op == 3:
+            # !=
+            return self._this != other._this
+        elif op == 4:
+            # >
+            return self._this > other._this
+        elif op == 5:
+            # >=
+            return self._this >= other._this
+    
+    def __nonzero__(self):
+        return self._this != NULL
+    
+    def __hash__(self):
+        return <size_t>self._this
+
+
+cdef getdefault(obj, key, default=None):
+    try:
+        return obj[key]
+    except (KeyError, IndexError):
+        return default
+
+cdef guess_shape(obj):
+    lengths = []
+    while obj is not None:
+        lengths.append(len(obj))
+        obj = getdefault(0)
+    return tuple(lengths)
+
+cdef class Image:
+    property width:
+        def __get__(self):
+            return self._this.width
+
+    property height:
+        def __get__(self):
+            return self._this.height
+    
+    property size:
+        def __get__(self):
+            return (self.width, self.height)
+    
+    property pixels:
+        def __get__(self):
+            return self._data
+            
+        def __set__(self, value):
+            cdef float[:,:,::1] data
+            if isinstance(contour, (tuple, list)):
+                shape = guess_shape(value)
+                data = view.array(shape=shape, itemsize=sizeof(float), format="f")
+                for i in range(shape[0]):
+                    for j in range(shape[1]):
+                        for k in range(shape[2]):
+                            self._data[i,j,k] = value[i][j][k]
+            else:
+                # must be a memory view or a buffer type
+                shape = value.shape
+                data = value
+            
+            self._this.width = shape[0]
+            self._this.height = shape[1]
+            self._this.pixels = &data[0][0][0]
+            
+            self._data = data
+    
+    def __cinit__(self):
+        self._this = NULL
+        
+    def __init__(self):
+        self._this = <c_glfw3.GLFWimage *>malloc(sizeof(c_glfw3.GLFWimage))
+    
+    def __dealloc__(self):
+        free(self._this)
+        self._this = NULL
+        
+    def __richcmp__(Image self, Image other, int op):
+        if op == 0:
+            # <
+            return self._this < other._this
+        elif op == 1:
+            # <=
+            return self._this <= other._this
+        elif op == 2:
+            # ==
+            return self._this == other._this
+        elif op == 3:
+            # !=
+            return self._this != other._this
+        elif op == 4:
+            # >
+            return self._this > other._this
+        elif op == 5:
+            # >=
+            return self._this >= other._this
+    
+    def __nonzero__(self):
+        return self._this != NULL
+    
+    def __hash__(self):
+        return <size_t>self._this
+"""
+
 cdef class GammaRamp:
     property red:
         def __get__(self):
@@ -669,7 +882,14 @@ cdef class Window:
         
         def __set__(self, value):
             c_glfw3.glfwSetWindowSize(self._this, value[0], value[1])
-    
+    #GLFW 3.1+
+    """
+    property frame_size:
+        def __get__(self):
+            cdef int l, t, r, b
+            c_glfw3.glfwGetWindowFrameSize(self._this, &l, &t, &r, &b)
+            return (l, t, r, b)
+    """
     property should_close:
         def __get__(self):
             return c_glfw3.glfwWindowShouldClose(self._this)
@@ -705,9 +925,8 @@ cdef class Window:
         _hints.update(DEFAULT_CONTEXT_HINTS)
         _hints.update(hints or {})
         
-        #c_glfw3.glfwDefaultWindowHints()
         for key, value in _hints.items():
-            c_glfw3.glfwWindowHint(key, value)
+            Window.hint(key, value)
         
         self._this = c_glfw3.glfwCreateWindow(size[0], size[1], title, _monitor, _share)
         
@@ -843,6 +1062,15 @@ cdef class Window:
     on_mouse_enter = set_cursor_enter_callback
     on_mouse_wheel = set_scroll_callback
     #on_window_drop = set_drop_callback
+    
+    cpdef get_attribute(self, int attrib):
+        return c_glfw3.glfwGetWindowAttrib(self._this, attrib)
+        
+    cpdef get_input_mode(self, int mode):
+        return c_glfw3.glfwGetInputMode(self._this, mode)
+    
+    cpdef set_input_mode(self, int mode, int value):
+        c_glfw3.glfwSetInputMode(self._this, mode, value)
     
     cpdef iconify(self):
         c_glfw3.glfwIconifyWindow(self._this)
