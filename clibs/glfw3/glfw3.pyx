@@ -693,10 +693,13 @@ cdef class Cursor:
     def __cinit__(self):
         self._this = NULL
     
+    #TODO: Ownership issues.
+    """
     @staticmethod
     def fromshape(shape):
-        c_glfw3.glfwCreateStandardCursor(shape)
-        return Cursor.fromthis()
+        cdef const c_glfw3.GLFWcursor * cursor = c_glfw3.glfwCreateStandardCursor(shape)
+        return Cursor.fromthis(cursor)
+    """
     
     def __init__(self, Image image, int xhot, int yhot):
         self._this = c_glfw3.glfwCreateCursor(image._this, xhot, yhot)
@@ -742,7 +745,7 @@ cdef guess_shape(obj):
     lengths = []
     while obj is not None:
         lengths.append(len(obj))
-        obj = getdefault(0)
+        obj = getdefault(obj, 0)
     return tuple(lengths)
 
 cdef class Image:
@@ -763,10 +766,10 @@ cdef class Image:
             return self._data
             
         def __set__(self, value):
-            cdef float[:,:,::1] data
-            if isinstance(contour, (tuple, list)):
+            cdef unsigned char[:,:,::1] data
+            if isinstance(value, (tuple, list)):
                 shape = guess_shape(value)
-                data = view.array(shape=shape, itemsize=sizeof(float), format="f")
+                data = view.array(shape=shape, itemsize=sizeof(unsigned char), format="u8")
                 for i in range(shape[0]):
                     for j in range(shape[1]):
                         for k in range(shape[2]):

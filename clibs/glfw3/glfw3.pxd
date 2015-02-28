@@ -50,18 +50,8 @@ cdef class Cursor:
         self._this, other._this = other._this, self._this
 
 cdef class Image:
-    cdef const c_glfw3.GLFWimage * _this
-    cdef float[:,:,::1] _data
-    
-    @staticmethod
-    cdef inline Image fromthis(c_glfw3.GLFWimage * _this):
-        cdef Image result = Image.__new__(Image)
-        result._this = _this
-        return result
-    
-    @staticmethod
-    cdef inline void swap(Image self, Image other):
-        self._this, other._this = other._this, self._this
+    cdef c_glfw3.GLFWimage * _this
+    cdef unsigned char[:,:,::1] _data
 
 cdef class GammaRamp:
     cdef const c_glfw3.GLFWgammaramp * _this

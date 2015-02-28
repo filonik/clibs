@@ -15,17 +15,27 @@ except ImportError:
 extra_compile_args = []
 extra_link_args = []
 
+glfw3_lib = 'glfw3'
+mcpp_lib = 'mcpp'
+tess2_lib = 'tess2'
+
 platform = sys.platform.lower()
 if 'darwin' in platform or 'linux' in platform:
     extra_compile_args.extend(['-I/usr/local/include', '-I/opt/local/include'])
     extra_link_args.extend(['-L/usr/local/lib', '-L/opt/local/lib'])
 
+if 'win32' in platform:
+    glfw3_lib = 'glfw3dll'
+    glfw3_root = os.environ.get('GLFW_ROOT')
+    extra_compile_args.append('-I%s' % (os.path.join(glfw3_root, 'include'),))
+    extra_link_args.append('/LIBPATH:%s' % (os.path.join(glfw3_root, 'lib-vc2013'),))
+
 _all_ = {
-    'clibs.glfw3': Extension('clibs.glfw3.glfw3', ['clibs/glfw3/glfw3.pyx'], libraries=['glfw3'],
+    'clibs.glfw3': Extension('clibs.glfw3.glfw3', ['clibs/glfw3/glfw3.pyx'], libraries=[glfw3_lib],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args
     ),
-    'clibs.mcpp': Extension('clibs.mcpp.mcpp_lib', ['clibs/mcpp/mcpp_lib.pyx'], libraries=['mcpp'],
+    'clibs.mcpp': Extension('clibs.mcpp.mcpp_lib', ['clibs/mcpp/mcpp_lib.pyx'], libraries=[mcpp_lib],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args
     ),
@@ -37,7 +47,7 @@ _all_ = {
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args + ['-framework', 'OpenGL']
     ),
-    'clibs.tess2': Extension('clibs.tess2.tesselator', ['clibs/tess2/tesselator.pyx'], libraries=['tess2'],
+    'clibs.tess2': Extension('clibs.tess2.tesselator', ['clibs/tess2/tesselator.pyx'], libraries=[tess2_lib],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args
     ),
