@@ -734,18 +734,24 @@ cdef class Cursor:
     def __hash__(self):
         return <size_t>self._this
 
-
-cdef getdefault(obj, key, default=None):
+cdef getitem(obj, key, default=None):
     try:
         return obj[key]
-    except (KeyError, IndexError):
+    except (TypeError, KeyError, IndexError):
         return default
 
-cdef guess_shape(obj):
+cdef getlen(obj, default=None):
+    try:
+        return len(obj)
+    except TypeError:
+        return default
+
+cdef getshape(obj):
     lengths = []
-    while obj is not None:
-        lengths.append(len(obj))
-        obj = getdefault(obj, 0)
+    while True:
+        length, obj = getlen(obj), getitem(obj, 0)
+        if length is None: break
+        lengths.append(length)
     return tuple(lengths)
 
 cdef class Image:
@@ -768,19 +774,18 @@ cdef class Image:
         def __set__(self, value):
             cdef unsigned char[:,:,::1] data
             if isinstance(value, (tuple, list)):
-                shape = guess_shape(value)
-                data = view.array(shape=shape, itemsize=sizeof(unsigned char), format="u8")
+                shape = getshape(value)
+                data = view.array(shape=shape, itemsize=sizeof(unsigned char), format="c")
                 for i in range(shape[0]):
                     for j in range(shape[1]):
                         for k in range(shape[2]):
-                            self._data[i,j,k] = value[i][j][k]
+                            data[i,j,k] = value[i][j][k]
             else:
                 # must be a memory view or a buffer type
-                shape = value.shape
                 data = value
             
-            self._this.width = shape[0]
-            self._this.height = shape[1]
+            self._this.width = data.shape[0]
+            self._this.height = data.shape[1]
             self._this.pixels = &data[0][0][0]
             
             self._data = data
@@ -908,16 +913,20 @@ cdef class Window:
             c_glfw3.glfwGetFramebufferSize(self._this, &w, &h)
             return (w, h)
     
-    property title:
-        def __set__(self, const char * value):
-            c_glfw3.glfwSetWindowTitle(self._this, value)
-    
     property clipboard_string:
         def __get__(self):
             return c_glfw3.glfwGetClipboardString(self._this)
         
         def __set__(self, const char * value):
             c_glfw3.glfwSetClipboardString(self._this, value)
+    
+    property title:
+        def __set__(self, const char * value):
+            c_glfw3.glfwSetWindowTitle(self._this, value)
+    
+    property cursor:
+        def __set__(self, Cursor value):
+            c_glfw3.glfwSetCursor(self._this, value._this)
     
     def __cinit__(self, *args, **kwargs):
         self._this = NULL
