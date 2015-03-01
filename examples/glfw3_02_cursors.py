@@ -17,21 +17,20 @@ def handle_keyboard_key(window, key, scancode, action, mods):
         window.should_close = True
 
 def make_cursor_image(width, height):
-    result = glfw3.Image()
-    result.pixels = [[[0, 255*(x/width), 255*(y/height), 255] for x in range(width)] for y in range(height)]
-    return result
+    pixels = [[(0, 255*(x/width), 255*(y/height), 255) for x in range(width)] for y in range(height)]
+    return glfw3.Image(pixels)
 
 def load_cursor_image(path):
     import PIL.Image
-    result = glfw3.Image()
-    result.pixels = np.array(PIL.Image.open(path).convert("RGBA"), copy=True) # Copy, MemoryView cannot be read-only. :(
-    return result
-    
+    pixels = np.array(PIL.Image.open(path).convert("RGBA"))
+    return glfw3.Image(pixels)
+
 def main():
     with glfw3.initialized():
         window = glfw3.Window("Hello GLFW3!", (800, 600))
         
-        image = make_cursor_image(32, 32) #load_cursor_image('logo.png')
+        image = make_cursor_image(32, 32)
+        #image = load_cursor_image('examples/image.png')
         cursor = glfw3.Cursor(image, image.width/2, image.height/2)
         window.cursor = cursor
         

@@ -758,7 +758,7 @@ cdef class Image:
     property width:
         def __get__(self):
             return self._this.width
-
+    
     property height:
         def __get__(self):
             return self._this.height
@@ -766,40 +766,45 @@ cdef class Image:
     property size:
         def __get__(self):
             return (self.width, self.height)
-    
+
     property pixels:
         def __get__(self):
             return self._data
-            
+
         def __set__(self, value):
             cdef unsigned char[:,:,::1] data
             if isinstance(value, (tuple, list)):
                 shape = getshape(value)
-                data = view.array(shape=shape, itemsize=sizeof(unsigned char), format="c")
+                data = view.array(shape=(shape[0], shape[1], 4), itemsize=sizeof(unsigned char), format="c")
                 for i in range(shape[0]):
                     for j in range(shape[1]):
-                        for k in range(shape[2]):
-                            data[i,j,k] = value[i][j][k]
+                        data[i,j,0] = getitem(value[i][j], 0, 0x00)
+                        data[i,j,1] = getitem(value[i][j], 1, 0x00)
+                        data[i,j,2] = getitem(value[i][j], 2, 0x00)
+                        data[i,j,3] = getitem(value[i][j], 3, 0xFF)
             else:
-                # must be a memory view or a buffer type
+                # must be a (writable) memory view or a buffer type
                 data = value
-            
+
             self._this.width = data.shape[0]
             self._this.height = data.shape[1]
             self._this.pixels = &data[0][0][0]
-            
+
             self._data = data
-    
+
     def __cinit__(self):
         self._this = NULL
-        
-    def __init__(self):
+
+    def __init__(self, pixels=None):
         self._this = <c_glfw3.GLFWimage *>malloc(sizeof(c_glfw3.GLFWimage))
-    
+        
+        if pixels is not None:
+            self.pixels = pixels
+        
     def __dealloc__(self):
         free(self._this)
         self._this = NULL
-        
+
     def __richcmp__(Image self, Image other, int op):
         if op == 0:
             # <
