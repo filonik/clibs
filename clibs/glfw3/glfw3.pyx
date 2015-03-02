@@ -925,6 +925,15 @@ cdef class Window:
         def __set__(self, const char * value):
             c_glfw3.glfwSetClipboardString(self._this, value)
     
+    property cursor_position:
+        def __get__(self):
+            cdef double x, y
+            c_glfw3.glfwGetCursorPos(self._this, &x, &y)
+            return (x, y)
+        
+        def __set__(self, value):
+            c_glfw3.glfwSetCursorPos(self._this, value[0], value[1])
+    
     property title:
         def __set__(self, const char * value):
             c_glfw3.glfwSetWindowTitle(self._this, value)
