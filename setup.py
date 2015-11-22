@@ -27,8 +27,17 @@ if 'darwin' in platform or 'linux' in platform:
 if 'win32' in platform:
     glfw3_lib = 'glfw3dll'
     glfw3_root = os.environ.get('GLFW_ROOT')
-    extra_compile_args.append('-I%s' % (os.path.join(glfw3_root, 'include'),))
-    extra_link_args.append('/LIBPATH:%s' % (os.path.join(glfw3_root, 'lib-vc2013'),))
+    if glfw3_root is not None:
+        extra_compile_args.append('-I%s' % (os.path.join(glfw3_root, 'include'),))
+        extra_link_args.append('/LIBPATH:%s' % (os.path.join(glfw3_root, 'lib-vc2012'),))
+    mcpp_root = os.environ.get('MCPP_ROOT')
+    if mcpp_root is not None:
+        extra_compile_args.append('-I%s' % (os.path.join(mcpp_root, 'src'),))
+        extra_link_args.append('/LIBPATH:%s' % (os.path.join(mcpp_root, 'lib'),))
+    tess2_root = os.environ.get('TESS2_ROOT')
+    if tess2_root is not None:
+        extra_compile_args.append('-I%s' % (os.path.join(tess2_root, 'include'),))
+        extra_link_args.append('/LIBPATH:%s' % (os.path.join(tess2_root, 'lib-vc2012'),))
 
 _all_ = {
     'clibs.glfw3': Extension('clibs.glfw3.glfw3', ['clibs/glfw3/glfw3.pyx'], libraries=[glfw3_lib],
@@ -57,7 +66,7 @@ selection = [arg for arg in sys.argv if arg.startswith('clibs.')]
 
 for arg in selection: sys.argv.remove(arg)
 
-ext_modules = cythonize(filter(None, [_all_.get(arg) for arg in selection]))
+ext_modules = cythonize(list(filter(None, [_all_.get(arg) for arg in selection])))
 
 setup(
     name="clibs",
