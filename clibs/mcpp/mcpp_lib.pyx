@@ -16,7 +16,9 @@ cimport c_mcpp_lib
 
 
 from libc.stdlib cimport malloc, free
-from cpython.string cimport PyString_AsString
+#from cpython.string cimport PyString_AsString
+from cpython.bytes cimport PyBytes_AS_STRING
+from cpython.unicode cimport PyUnicode_AsEncodedString
 
 cpdef enum OUTDEST:
     OUT=c_mcpp_lib.OUT
@@ -47,9 +49,11 @@ def lib_main(argv):
         int cargc = len(argv)
         char **cargv = <char**>malloc(cargc * sizeof(char*))
     
+    avgv = [PyUnicode_AsEncodedString(arg, "utf-8", "Error ~") for arg in argv]
     for i in range(cargc):
-        cargv[i] = PyString_AsString(argv[i])
-        
+        #cargv[i] = PyString_AsString(argv[i])
+        cargv[i] = PyBytes_AS_STRING(avgv[i])
+
     cret = c_mcpp_lib.mcpp_lib_main(cargc, cargv)
     
     free(cargv)
